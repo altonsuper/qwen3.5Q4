@@ -14,7 +14,7 @@ cd qwen3.5Q4
 
 # Run agent
 node agent_core.js config_coder.json project1
-123456789101112131415
+
 # 👑 Supreme Agent Core - Qwen 3.5 LocalLocal AI orchestration framework powered by Ollama + Qwen 3.5-0.8B.## 🚀 Quick Start```powershell# Clone repogit clone https://github.com/altonsuper/qwen3.5Q4.gitcd qwen3.5Q4# Install dependencies (jika ada)# npm install# Run agentnode agent_core.js config_coder.json project1
 📁 Structure
 agent_core.js - Universal agent engine
