@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ai-Bleton // Grimoire Engine v0.3</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #0a0a0a;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff41;
+            --neon-orange: #ff8c00;
+            --text-color: #e0e0e0;
+            --grid-gap: 8px;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        header {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #000 0%, #111 100%);
+            border-bottom: 1px solid var(--neon-cyan);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+        .brand {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 5px var(--neon-cyan);
+            letter-spacing: 2px;
+        }
+        .status-panel {
+            display: flex;
+            gap: 15px;
+            font-size: 0.75rem;
+            align-items: center;
+        }
+        .status-item { display: flex; align-items: center; gap: 5px; }
+        .indicator {
+            width: 8px; height: 8px; border-radius: 50%;
+            background-color: #333;
+            box-shadow: 0 0 2px #333;
+            transition: 0.2s;
+        }
+        .indicator.on { background-color: var(--neon-green); box-shadow: 0 0 5px var(--neon-green); }
+        .indicator.rec { background-color: var(--neon-pink); box-shadow: 0 0 5px var(--neon-pink); }
+
+        .daw-container {
+            margin: 20px 10px;
+            background: var(--panel-bg);
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            max-width: 500px;
+            width: 95%;
+        }
+        .daw-container::before {
+            content: ''; position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border-radius: 4px; padding: 1px;
+            background: linear-gradient(45deg, var(--neon-cyan), transparent, var(--neon-pink));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            pointer-events: none;
+        }
+        h2, h3 {
+            text-align: center;
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            text-shadow: 0 0 5px var(--neon-pink);
+            font-size: 1rem;
+        }
+        h3 { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan); font-size: 0.9rem; }
+
+        /* 5x3 Clip Pad Grid */
+        .clip-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: var(--grid-gap);
+            margin-bottom: 20px;
+            aspect-ratio: 5/3;
+        }
+        .pad {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.05s ease;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 4px;
+            user-select: none;
+        }
+        .pad:hover { border-color: var(--neon-cyan); }
+        .pad.loaded { border-color: #555; }
+        .pad.playing {
+            background: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan), inset 0 0 10px rgba(255,255,255,0.3);
+            border-color: #fff;
+            transform: scale(0.95);
+        }
+        .pad-key { font-size: 0.6rem; color: #666; align-self: flex-start; }
+        .pad-name {
+            font-size: 0.55rem;
+            color: #999;
+            text-align: center;
+            word-break: break-all;
+            line-height: 1;
+        }
+        .pad.playing .pad-key, .pad.playing .pad-name { color: #000; }
+
+        /* Controls */
+        .controls, .kitab-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin: 15px 0;
+            padding-top: 15px;
+            border-top: 1px solid #222;
+        }
+        button, .file-label {
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            border-radius: 2px;
+        }
+        button:hover, .file-label:hover {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+        button.record-btn { border-color: var(--neon-pink); color: var(--neon-pink); }
+        button.record-btn:hover { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+        button:disabled { border-color: #444; color: #444; cursor: not-allowed; background: transparent; box-shadow: none; }
+
+        .kitab-controls button { border-color: var(--neon-orange); color: var(--neon-orange); }
+        .kitab-controls button:hover { background: var(--neon-orange); box-shadow: 0 0 10px var(--neon-orange); }
+
+        input[type="file"] { display: none; }
+
+        .info-display {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        #timer { color: var(--neon-cyan); font-weight: bold; }
+
+        /* Manual Slot Loader */
+        .manual-loader {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #222;
+        }
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .slot {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 2px;
+            padding: 4px;
+            font-size: 0.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .slot.loaded { border-color: var(--neon-green); }
+        .slot-header { display: flex; justify-content: space-between; color: var(--neon-cyan); }
+        .slot .file-label { padding: 2px 4px; font-size: 0.55rem; text-align: center; }
+        .slot .clear { padding: 1px 4px; font-size: 0.6rem; border-color: #800; color: #f00; background: transparent; }
+        .slot .clear:hover { background: #800; color: #fff; }
+
+        footer {
+            margin-top: auto;
+            padding: 15px;
+            font-size: 0.65rem;
+            color: #444;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">AI-BLETON // GRIMOIRE v0.3</div>
+        <div class="status-panel">
+            <div class="status-item">
+                <div class="indicator" id="main-indicator"></div>
+                <span id="audio-status">OFFLINE</span>
+            </div>
+            <div class="status-item">BPM: <span id="bpm-display">120</span></div>
+        </div>
+    </header>
+
+    <div class="daw-container">
+        <h2>CLIP PAD MATRIX 5x3</h2>
+        <div class="clip-grid" id="grid"></div>
+
+        <div class="controls">
+            <button id="btn-record" class="record-btn">REC</button>
+            <button id="btn-stop" disabled>STOP</button>
+            <button id="btn-play-json">PLAY PERF</button>
+            <input type="file" id="file-input-perf" accept=".json">
+        </div>
+
+        <div class="info-display">
+            Status: <span id="status-text">Ready</span> |
+            Time: <span id="timer">0.00s</span> |
+            Events: <span id="event-count">0</span>
+        </div>
+
+        <div class="kitab-controls">
+            <h3>GRIMOIRE BANK</h3>
+            <button id="load-kitab">Load Kitab</button>
+            <input type="file" id="file-input-kitab" accept=".json">
+            <button id="save-kitab">Save Kitab</button>
+        </div>
+
+        <div class="manual-loader">
+            <h3>MANUAL SLOT LOADER 0-14</h3>
+            <div class="slot-grid" id="slot-grid"></div>
+        </div>
+    </div>
+
+    <footer>Generated by UltraScan Orchestration | Press Q W E R T / A S D F G / Z X C V B</footer>
+
+    <script>
+        // --- Core State ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx, masterGain, mediaRecorder;
+        let isRecording = false, recordStartTime = 0, timerInterval;
+        let recordedEvents = [], recordedChunks = [];
+
+        const ROWS = 3, COLS = 5, TOTAL_PADS = 15;
+        const KEY_MAP = {
+            'q':0,'w':1,'e':2,'r':3,'t':4,
+            'a':5,'s':6,'d':7,'f':8,'g':9,
+            'z':10,'x':11,'c':12,'v':13,'b':14
+        };
+        const KEY_LABELS = ['Q','W','E','R','T','A','S','D','F','G','Z','X','C','V','B'];
+
+        let patternBank = [createEmptyPattern()];
+        let activeSceneIndex = 0;
+        let activePattern = patternBank[0];
+        let audioBuffers = new Array(TOTAL_PADS).fill(null);
+        let activeSources = new Array(TOTAL_PADS).fill(null);
+        const pressedKeys = new Set();
+
+        function createEmptyPattern() {
+            return Array(TOTAL_PADS).fill(null).map((_, i) => ({
+                id: i, key: KEY_LABELS[i].toLowerCase(),
+                name: `Pad ${i}`, sample: null,
+                volume: 0.8, mode: "one-shot", color: "#1a1a1a"
+            }));
+        }
+
+        // --- Audio Engine ---
+        async function initAudio() {
+            if (audioCtx) {
+                if (audioCtx.state === 'suspended') await audioCtx.resume();
+                return;
+            }
+            audioCtx = new AudioContext();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.4;
+
+            const dest = audioCtx.createMediaStreamDestination();
+            masterGain.connect(dest);
+            masterGain.connect(audioCtx.destination);
+
+            mediaRecorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm' });
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = handleRecordStop;
+
+            document.getElementById('audio-status').innerText = "ONLINE";
+            document.getElementById('main-indicator').classList.add('on');
+        }
+
+        function triggerPad(index, velocity = 1.0) {
+            if (!audioCtx) initAudio(); // Auto-init on first click
+            if (!audioBuffers[index] || !audioCtx) return;
+
+            // Stop previous if one-shot
+            if (activeSources[index]) {
+                try { activeSources[index].stop(); } catch(e) {}
+            }
+
+            const source = audioCtx.createBufferSource();
+            source.buffer = audioBuffers[index];
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = activePattern[index].volume * velocity;
+
+            source.connect(gainNode);
+            gainNode.connect(masterGain);
+            source.start(0);
+            activeSources[index] = source;
+
+            // Record event
+            if (isRecording) {
+                recordedEvents.push({
+                    time: audioCtx.currentTime - recordStartTime,
+                    pad: index,
+                    type: 'trigger',
+                    vel: velocity
+                });
+                document.getElementById('event-count').innerText = recordedEvents.length;
+            }
+
+            // Visual
+            const pad = document.querySelector(`.pad[data-index="${index}"]`);
+            if(pad) {
+                pad.classList.add('playing');
+                source.onended = () => {
+                    pad.classList.remove('playing');
+                    activeSources[index] = null;
+                };
+            }
+        }
+
+        // --- UI Generation ---
+        function createGrid() {
+            const gridEl = document.getElementById('grid');
+            const slotGridEl = document.getElementById('slot-grid');
+            gridEl.innerHTML = '';
+            slotGridEl.innerHTML = '';
+
+            for (let i = 0; i < TOTAL_PADS; i++) {
+                // Main Pad
+                const pad = document.createElement('div');
+                pad.className = 'pad';
+                pad.dataset.index = i;
+                pad.innerHTML = `
+                    <div class="pad-key">${KEY_LABELS[i]}</div>
+                    <div class="pad-name">${activePattern[i].name}</div>
+                `;
+                pad.addEventListener('pointerdown', e => { e.preventDefault(); triggerPad(i); });
+                gridEl.appendChild(pad);
+
+                // Manual Slot
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.dataset.pad = i;
+                slot.innerHTML = `
+                    <div class="slot-header">
+                        <span>${i}:${KEY_LABELS[i]}</span>
+                        <button class="clear" onclick="clearSlot(${i})">X</button>
+                    </div>
+                    <label class="file-label">
+                        LOAD
+                        <input type="file" accept="audio/*" onchange="loadSampleToSlot(${i}, this)">
+                    </label>
+                `;
+                slotGridEl.appendChild(slot);
+            }
+        }
+
+        function updatePadUI(index) {
+            const pad = document.querySelector(`.pad[data-index="${index}"]`);
+            const slot = document.querySelector(`.slot[data-pad="${index}"]`);
+            const data = activePattern[index];
+            const loaded = !!audioBuffers[index];
+
+            if(pad) {
+                pad.classList.toggle('loaded', loaded);
+                pad.querySelector('.pad-name').innerText = data.name;
+                if (loaded && data.color && data.color !== "#1a1a1a") {
+                    pad.style.borderColor = data.color;
+                }
+            }
+            if(slot) slot.classList.toggle('loaded', loaded);
+        }
+
+        // --- Sample Loading ---
+        async function loadSampleToSlot(index, inputEl) {
+            await initAudio();
+            const file = inputEl.files[0];
+            if (!file) return;
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                audioBuffers[index] = audioBuffer;
+                activePattern[index].name = file.name.substring(0, 12);
+                activePattern[index].sample = "local_file"; 
+                updatePadUI(index);
+            } catch (err) {
+                alert(`Error loading audio: ${err.message}`);
+            }
+            inputEl.value = ''; 
+        }
+
+        function clearSlot(index) {
+            audioBuffers[index] = null;
+            activePattern[index] = createEmptyPattern()[index];
+            activePattern[index].id = index;
+            activePattern[index].key = KEY_LABELS[index].toLowerCase();
+            updatePadUI(index);
+        }
+
+        // --- Kitab Load/Save ---
+        document.getElementById('load-kitab').onclick = () => document.getElementById('file-input-kitab').click();
+        document.getElementById('file-input-kitab').onchange = async (e) => {
+            await initAudio();
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const kitab = JSON.parse(text);
+                if (!kitab.pads || kitab.pads.length !== 15) throw new Error("Invalid Kitab format");
+
+                activePattern = kitab.pads;
+                patternBank[0] = activePattern; 
+
+                // Load all samples
+                let loadedCount = 0;
+                for (let i = 0; i < 15; i++) {
+                    const padData = activePattern[i];
+                    if (padData.sample && padData.sample.startsWith('data:audio')) {
+                        // Simple progress feedback could be added here
+                        const base64 = padData.sample.split(',')[1];
+                        const binary = atob(base64);
+                        const bytes = new Uint8Array(binary.length);
+                        for (let j = 0; j < binary.length; j++) bytes[j] = binary.charCodeAt(j);
+                        try {
+                            const buffer = await audioCtx.decodeAudioData(bytes.buffer);
+                            audioBuffers[i] = buffer;
+                            loadedCount++;
+                        } catch(err) { console.error("Failed to decode pad", i); }
+                    } else {
+                        audioBuffers[i] = null;
+                    }
+                    updatePadUI(i);
+                }
+                alert(`Kitab "${kitab.name}" loaded! ${loadedCount} sounds ready.`);
+            } catch (err) {
+                alert(`Kitab load error: ${err.message}`);
+            }
+            e.target.value = '';
+        };
+
+        document.getElementById('save-kitab').onclick = async () => {
+            const kitab = {
+                ai_bleton_kitab: "v1",
+                name: `Kitab_${Date.now()}`,
+                author: "Human",
+                bpm: 120,
+                pads: JSON.parse(JSON.stringify(activePattern)) 
+            };
+
+            // Convert AudioBuffers to base64 (Warning: Large Files)
+            for (let i = 0; i < 15; i++) {
+                if (audioBuffers[i]) {
+                    const wav = audioBufferToWav(audioBuffers[i]); 
+                    const base64 = btoa(String.fromCharCode(...new Uint8Array(wav)));
+                    kitab.pads[i].sample = `data:audio/wav;base64,${base64}`;
+                } else {
+                    kitab.pads[i].sample = null;
+                }
+            }
+
+            downloadJSON(kitab, `${kitab.name}.json`);
+        };
+
+        // --- Recording ---
+        document.getElementById('btn-record').onclick = async () => {
+            await initAudio();
+            if (isRecording) return;
+            isRecording = true;
+            recordedEvents = [];
+            recordedChunks = [];
+            recordStartTime = audioCtx.currentTime;
+            mediaRecorder.start();
+
+            document.getElementById('btn-record').disabled = true;
+            document.getElementById('btn-stop').disabled = false;
+            document.getElementById('status-text').innerText = "RECORDING";
+            document.getElementById('main-indicator').classList.add('rec');
+            document.getElementById('event-count').innerText = '0';
+            timerInterval = setInterval(updateTimer, 50);
+        };
+
+        document.getElementById('btn-stop').onclick = () => {
+            if (!isRecording) return;
+            isRecording = false;
+            mediaRecorder.stop();
+            clearInterval(timerInterval);
+            document.getElementById('btn-record').disabled = false;
+            document.getElementById('btn-stop').disabled = true;
+            document.getElementById('status-text').innerText = "Ready";
+            document.getElementById('main-indicator').classList.remove('rec');
+            savePerformanceJSON();
+        };
+
+        function handleRecordStop() {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            downloadBlob(URL.createObjectURL(blob), `ai-bleton_take_${Date.now()}.webm`);
+            recordedChunks = [];
+        }
+
+        function savePerformanceJSON() {
+            const perf = {
+                version: "ai-bleton-v0.3",
+                bpm: 120,
+                duration: audioCtx.currentTime - recordStartTime,
+                date: new Date().toISOString(),
+                events: recordedEvents,
+                kitab: activePattern 
+            };
+            downloadJSON(perf, `ai-bleton_perf_${Date.now()}.json`);
+        }
+
+        document.getElementById('btn-play-json').onclick = () => document.getElementById('file-input-perf').click();
+        document.getElementById('file-input-perf').onchange = async (e) => {
+            await initAudio();
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const data = JSON.parse(await file.text());
+                const startTime = audioCtx.currentTime + 0.1;
+                document.getElementById('status-text').innerText = "PLAYING PERF...";
+                
+                data.events.forEach(evt => {
+                    const delay = (evt.time * 1000);
+                    setTimeout(() => {
+                        triggerPad(evt.pad, evt.vel || 1.0);
+                    }, delay);
+                });
+
+                // Reset status after play
+                const totalDuration = data.duration ? data.duration * 1000 : 5000;
+                setTimeout(() => {
+                     document.getElementById('status-text').innerText = "Ready";
+                }, totalDuration);
+
+            } catch(err) {
+                alert("Invalid Performance File");
+            }
+            e.target.value = '';
+        };
+
+        function updateTimer() {
+            const delta = audioCtx.currentTime - recordStartTime;
+            document.getElementById('timer').innerText = delta.toFixed(2) + 's';
+        }
+
+        // --- Keyboard ---
+        document.addEventListener('keydown', e => {
+            if (e.repeat) return;
+            const idx = KEY_MAP[e.key.toLowerCase()];
+            if (idx !== undefined && !pressedKeys.has(idx)) {
+                pressedKeys.add(idx);
+                triggerPad(idx);
+            }
+        });
+        document.addEventListener('keyup', e => {
+            const idx = KEY_MAP[e.key.toLowerCase()];
+            if (idx !== undefined) pressedKeys.delete(idx);
+        });
+
+        // --- Utils ---
+        function downloadJSON(obj, filename) {
+            const str = JSON.stringify(obj, null, 2);
+            const blob = new Blob([str], { type: 'application/json' });
+            downloadBlob(URL.createObjectURL(blob), filename);
+        }
+
+        function downloadBlob(url, filename) {
+            const a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); a.remove();
+        }
+
+        // Simple WAV encoder
+        function audioBufferToWav(buffer) {
+            const numChan = buffer.numberOfChannels, len = buffer.length * numChan * 2 + 44;
+            const view = new DataView(new ArrayBuffer(len));
+            let pos = 0;
+            const writeStr = s => { for (let i = 0; i < s.length; i++) view.setUint8(pos++, s.charCodeAt(i)); };
+            writeStr('RIFF'); view.setUint32(pos, len - 8, true); pos += 4; writeStr('WAVE');
+            writeStr('fmt '); view.setUint32(pos, 16, true); pos += 4; view.setUint16(pos, 1, true); pos += 2;
+            view.setUint16(pos, numChan, true); pos += 2; view.setUint32(pos, buffer.sampleRate, true); pos += 4;
+            view.setUint32(pos, buffer.sampleRate * 2 * numChan, true); pos += 4;
+            view.setUint16(pos, numChan * 2, true); pos += 2; view.setUint16(pos, 16, true); pos += 2;
+            writeStr('data'); view.setUint32(pos, len - pos - 4, true); pos += 4;
+            for (let i = 0; i < buffer.length; i++) for (let ch = 0; ch < numChan; ch++) {
+                let sample = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
+                view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true); pos += 2;
+            }
+            return view.buffer;
+        }
+
+        // --- Init ---
+        createGrid();
+        for (let i = 0; i < 15; i++) updatePadUI(i);
+    </script>
+</body>
+</html>

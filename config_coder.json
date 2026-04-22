@@ -1,0 +1,12 @@
+{
+  "ollama": {
+    "model": "qwen3.5:0.8b",
+    "num_predict": 2048,
+    "num_ctx": 2048,
+    "num_thread": 2,
+    "temperature": 0.2,
+    "top_p": 0.9,
+    "stop": ["\n\n\n", "```", "--neon-green-dark-light"],
+    "system_code": "You are an expert Senior Developer. STRICT RULES: 1. Output ONLY raw code. 2. No markdown. 3. Follow user instructions precisely. 4. NEVER repeat variables or properties. 5. If looping, STOP IMMEDIATELY."
+  }
+}

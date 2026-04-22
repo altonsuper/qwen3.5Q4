@@ -1,0 +1,35 @@
+# ==========================================
+# 👑 QWEN LOCAL AGENT - QUICK START COMMANDS
+# 💡 Copy baris di bawah & paste ke PowerShell
+# 📍 Pastikan terminal di: C:\ALLAI\ANY\real
+# ==========================================
+
+# 🧑‍💻 CODER MODE → Web/HTML/CSS/JS Generation
+node agent_core.js config_coder.json project1
+
+# ✍️ WRITER MODE → Copywriting, SEO, Konten
+node agent_core.js config_writer.json project1
+
+# 🔍 ANALYST MODE → Debug, Code Review, Logic Check
+node agent_core.js config_analyst.json project1
+
+# 🎨 DESIGNER MODE → CSS/UI, Theme & Animation
+node agent_core.js config_designer.json project1
+
+# 🎮 GAME DEV MODE → Canvas, JS Game Logic
+node agent_core.js config_gamedev.json project1
+
+# 📂 OUTPUT KE FOLDER PROJECT SPESIFIK
+node agent_core.js config_coder.json mcaltonz
+node agent_core.js config_writer.json portfolio_bengkel
+
+# 🔄 PERINTAH DI DALAM AGENT (setelah prompt muncul)
+# /mode mono  → Output 1 file HTML lengkap (inline CSS/JS)
+# /mode sep   → Output 3 file terpisah (index.html + .css + .js)
+# /status     → Cek config, mode, & step aktif
+# exit        → Tutup agent
+
+# 🆕 CARA TAMBAH ROLE/CONFIG BARU:
+# 1. Buat file: config_namarole.json di folder ini
+# 2. Copy 1 baris di atas, ganti nama config & hint
+# 3. Simpan start.txt → langsung siap dipakai!

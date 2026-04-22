@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supreme Master Agent UI</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #0a0a0a;
+            --neon-green: #39ff14;
+            --neon-cyan: #00f3ff;
+            --text-color: #e0e0e0;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 280px;
+            background: var(--panel-bg);
+            border-right: 1px solid #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        h1 { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); margin-bottom: 30px; }
+        .control-group { margin-bottom: 20px; }
+        label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8rem; }
+        select {
+            width: 100%; background: #000; border: 1px solid #333;
+            color: var(--neon-cyan); padding: 10px; font-family: inherit;
+        }
+        #chat-area {
+            flex: 1; display: flex; flex-direction: column;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+        }
+        #messages {
+            flex: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .message {
+            max-width: 85%; padding: 15px; border-radius: 8px;
+            line-height: 1.5; position: relative; white-space: pre-wrap;
+        }
+        .user {
+            align-self: flex-end; background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+        }
+        .ai {
+            align-self: flex-start; background: rgba(57, 255, 20, 0.05);
+            border: 1px solid var(--neon-green); color: #fff;
+        }
+        .ai b { color: var(--neon-green); }
+        
+        /* Magic Save Button */
+        .save-btn {
+            margin-top: 10px;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--neon-green);
+            display: inline-block;
+        }
+        .save-btn:hover { background: #fff; }
+
+        #input-area {
+            padding: 20px; background: var(--panel-bg);
+            border-top: 1px solid #333; display: flex; gap: 10px;
+        }
+        #user-input {
+            flex: 1; background: #000; border: 1px solid #333;
+            color: #fff; padding: 15px; font-family: inherit;
+        }
+        button {
+            background: transparent; border: 1px solid var(--neon-green);
+            color: var(--neon-green); padding: 0 25px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+        button:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 15px var(--neon-green); }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h1>SUPREME UI</h1>
+        <div class="control-group">
+            <label>PROJECT FOLDER</label>
+            <select id="project-select">
+                <option value="project1">project1</option>
+                <option value="assemble">assemble</option>
+                <option value="output">output</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>AGENT MODE</label>
+            <select id="mode-select">
+                <option value="chat">💬 General Chat</option>
+                <option value="code">💻 Code Generator</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="chat-area">
+        <div id="messages">
+            <div class="message ai"><b>System:</b> Supreme Master Agent UI initialized. Ready.</div>
+        </div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Enter command..." autocomplete="off">
+            <button onclick="sendMessage()">Execute</button>
+        </div>
+    </div>
+
+    <script>
+        let currentCode = '';
+        let isCodeMode = false;
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const messages = document.getElementById('messages');
+            const project = document.getElementById('project-select').value;
+            const mode = document.getElementById('mode-select').value;
+            const text = input.value;
+            
+            if (!text) return;
+
+            isCodeMode = (mode === 'code');
+            currentCode = ''; // Reset code buffer
+
+            messages.innerHTML += `<div class="message user"><b>You:</b> ${text}</div>`;
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+
+            const aiMsgId = 'ai-' + Date.now();
+            messages.innerHTML += `<div class="message ai" id="${aiMsgId}"><b>Qwen:</b> </div>`;
+            const aiDiv = document.getElementById(aiMsgId);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, mode: mode, project: project })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n').filter(l => l.trim());
+                    
+                    for (const line of lines) {
+                        try {
+                            const json = JSON.parse(line);
+                            if (json.message && json.message.content) {
+                                fullText += json.message.content;
+                                currentCode += json.message.content; // Store for saving
+                                
+                                let formatted = fullText.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
+                                aiDiv.innerHTML = `<b>Qwen:</b> ${formatted}`;
+                                messages.scrollTop = messages.scrollHeight;
+                            }
+                        } catch (e) {}
+                    }
+                }
+
+                // Add Magic Save Button if in Code Mode
+                if (isCodeMode && currentCode.length > 50) {
+                    const saveBtn = document.createElement('button');
+                    saveBtn.className = 'save-btn';
+                    saveBtn.innerText = '💾 Save to ' + project;
+                    saveBtn.onclick = () => saveCode(project, aiDiv);
+                    aiDiv.appendChild(saveBtn);
+                }
+
+            } catch (err) {
+                aiDiv.innerHTML += `<br><span style="color:red">Error: ${err.message}</span>`;
+            }
+        }
+
+        async function saveCode(project, aiDiv) {
+            // Determine filename based on content
+            let filename = 'output.txt';
+            if (currentCode.includes('<!DOCTYPE')) filename = 'index.html';
+            else if (currentCode.includes('body {')) filename = 'style.css';
+            else if (currentCode.includes('function ')) filename = 'game.js';
+
+            const response = await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    project: project, 
+                    filename: filename, 
+                    content: currentCode 
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                aiDiv.innerHTML += `<br><span style="color:var(--neon-green)">✅ Saved as: ${filename}</span>`;
+            }
+        }
+        
+        document.getElementById('user-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

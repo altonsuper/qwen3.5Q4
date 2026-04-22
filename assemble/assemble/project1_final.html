@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assembled project1</title>
+    <style>
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Cyberpunk</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS Variables for Neon Theme */
+        :root {
+            --neon-green: #00ff00;
+            --neon-green-dim: #00cc00;
+            --neon-black: #000000;
+            --neon-black-dim: #000000;
+            --bg-color: #050505;
+            --card-bg: rgba(0, 20, 0, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--neon-green);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* Card Layout */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--neon-green);
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2), inset 0 0 20px rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Neon Border Effect */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 0, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        /* Typography */
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--neon-green);
+        }
+
+        /* Button */
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--neon-green);
+            color: var(--neon-black);
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>NEON CORE</h1>
+            <p class="subtitle">Cyberpunk Interface</p>
+        </header>
+
+        <div class="card">
+            <h2>System Status</h2>
+            <p>
+                <i class="fa-solid fa-wifi"></i> Network Active
+            </p>
+            <p>
+                <i class="fa-solid fa-satellite-dish"></i> Signal: 100%
+            </p>
+            <p>
+                <i class="fa-solid fa-shield-halved"></i> Security: Secure
+            </p>
+            
+            <button class="btn">Initialize System</button>
+        </div>
+
+        <footer>
+            &copy; 2023 Neon Core Systems
+        </footer>
+    </div>
+
+    <script>
+        // Simple JS for interactivity
+        document.querySelector('button').addEventListener('click', function() {
+            this.style.backgroundColor = '#00ff00';
+            this.style.color = '#000';
+            this.style.borderColor = '#00ff00';
+            
+            setTimeout(() => {
+                this.style.backgroundColor = 'transparent';
+                this.style.color = '#00ff00';
+                this.style.borderColor = '#00ff00';
+            }, 300);
+        });
+    </script>
+</body>
+</html>
+    </style>
+</head>
+<body>
+    <!DOCTYPE html>
+
+
+
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>5x3 Square DAW</h2>
+        
+        <div class="control-group">
+            <label>Load Sound (JSON)</label>
+            <input type="file" id="soundInput" accept=".json">
+        </div>
+
+        <div class="control-group">
+            <label>Recording</label>
+            <button id="btnStart">Start Recording</button>
+            <button id="btnStop" class="secondary">Stop Recording</button>
+        </div>
+
+        <div class="control-group">
+            <label>Settings</label>
+            <button onclick="saveToJSON()">Save JSON</button>
+            <button onclick="saveToWAV()">Save WAV</button>
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="main-area">
+        <div class="note-indicator" id="noteIndicator"></div>
+        <div class="waveform-container">
+            <canvas id="waveCanvas"></canvas>
+        </div>
+        <div class="controls-overlay">
+            <span id="statusText">Ready</span>
+            <div class="status-bar" id="statusBar">Duration: 0.00s</div>
+        </div>
+    </div>
+
+    <script>
+        // --- Audio Engine ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let audioBuffer;
+        let currentNote = null;
+        let currentDuration = 0;
+        let isRecording = false;
+        let isRecordingStarted = false;
+        let isRecordingStopped = false;
+        let currentNoteIndex = 0;
+        let currentNoteTime = 0;
+        let currentNoteFreq = 0;
+        let currentNoteVol = 0;
+        let currentNoteEnvelope = 0;
+        let currentNoteAttack = 0;
+        let currentNoteRelease = 0;
+        let currentNoteDuration = 0;
+        let currentNoteDurationInSec = 0;
+        let currentNoteDurationInMs = 0;
+
+        // 5x3 Square Sound Definition (Simplified)
+        // Using 48kHz, 16-bit, Square Wave
+        const squareSound = {
+            name: "5x3 Square",
+            type: "square",
+            freq: 48000,
+            volume: 0.5,
+            envelope: {
+                attack: 0.01,
+                decay: 0.05,
+                sustain: 0.05,
+                release: 0.1
+            },
+            // A simple square wave approximation
+            wave: {
+                freq: 48000,
+                amplitude: 0.5,
+                attack: 0.01,
+                decay: 0.05,
+                sustain: 0.05,
+                release: 0.1
+            }
+        };
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnStart = document.getElementById('btnStart');
+        const btnStop = document.getElementById('btnStop');
+        const statusText = document.getElementById('statusText');
+        const statusBar = document.getElementById('statusBar');
+        const noteIndicator = document.getElementById('noteIndicator');
+
+        // --- Initialization ---
+        function init() {
+            // Load Sound
+            const fileInput = document.getElementById('soundInput');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if (json.type === 'audio') {
+                            audioCtx = new AudioContext();
+                            audioBuffer = audioCtx.decodeAudioData(json.data);
+                            // Set volume based on file size
+                            const vol = Math.min(1, Math.max(0.1, audioBuffer.duration / 1000));
+                            squareSound.volume = vol;
+                            console.log("Loaded Sound:", json.name);
+                        } else {
+                            alert("Invalid JSON format.");
+                        }
+                    } catch (err) {
+                        alert("Error loading sound file.");
+                    }
+                };
+                reader.readAsText(fileInput.files[0]);
+            } else {
+                alert("Please select a sound file.");
+            }
+        }
+
+        // --- Waveform Drawing ---
+        function drawWaveform() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const step = width / 100; // 100 squares per row
+            const gridSize = 10; // 10x10 grid
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * step);
+                ctx.lineTo(width, i * step);
+                ctx.stroke();
+            }
+
+            // Draw Squares
+            for (let i = 0; i < gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * step, 0);
+                ctx.lineTo(i * step, height);
+                ctx.stroke();
+            }
+
+            // Draw Note
+            if (currentNoteIndex >= gridSize) {
+                // Finished recording
+                drawNote(currentNoteIndex, 0, 0, 0, 0, 0);
+                currentNoteIndex = 0;
+                currentNoteTime = 0;
+                currentNoteFreq = 0;
+                currentNoteVol = 0;
+                currentNoteEnvelope = 0;
+                currentNoteAttack = 0;
+                currentNoteRelease = 0;
+                currentNoteDuration = 0;
+                currentNoteDurationInSec = 0;
+                currentNoteDurationInMs = 0;
+                currentNote = null;
+                statusText.innerText = "Recording Complete";
+                statusText.style.color = "#007acc";
+                statusBar.innerText = "Duration: 0.00s";
+                return;
+            }
+
+            const noteX = i * step;
+            const noteY = 0;
+
+            // Draw Note
+            drawNote(currentNoteIndex, noteX, noteY, currentNoteFreq, currentNoteVol, currentNoteEnvelope, currentNoteAttack, currentNoteRelease, currentNoteDuration, currentNoteDurationInSec, currentNoteDurationInMs);
+        }
+
+        function drawNote(index, x, y, freq, vol, envelope, attack, release, duration, durationSec, durationMs) {
+            const step = 10;
+            const gridSize = 10;
+
+            // Draw Grid
+            ctx.strokeStyle = '#007acc';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * step, 0);
+                ctx.lineTo(i * step, height);
+                ctx.stroke();
+            }
+
+            // Draw Note
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + step, y + step);
+            ctx.stroke();
+
+            // Draw Note Body
+            ctx.beginPath();
+            ctx.arc(x + step, y + step, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#007acc';
+            ctx.fill();
+
+            // Draw Note Head
+            ctx.beginPath();
+            ctx.arc(x + step, y + step, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            // Draw Note Label
+            ctx.fillStyle = '#007acc';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(freq, x + step + 5, y + step + 5);
+
+            // Draw Envelope
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step, y + step + 5);
+            ctx.stroke();
+
+            // Draw Attack
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step, y + step + 10);
+            ctx.stroke();
+
+            // Draw Release
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step + 10, y + step + 10);
+            ctx.stroke();
+
+            // Draw Duration
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step + 10, y + step + 10);
+            ctx.stroke();
+
+            // Draw Duration Label
+            ctx.fillStyle = '#007acc';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(durationSec.toFixed(2), x + step + 5, y + step + 5);
+
+            // Draw Duration in ms
+            ctx.fillStyle = '#007acc';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(durationMs.toFixed(2), x + step + 5, y + step + 5);
+        }
+
+        // --- Recording Logic ---
+        function startRecording() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            isRecording = true;
+            isRecordingStarted = true;
+            btnStart.disabled = true;
+            btnStop.disabled = false;
+            statusText.innerText = "Recording...";
+            statusBar.innerText = "Duration: 0.00s";
+            drawWaveform();
+        }
+
+        function stopRecording() {
+            if (!isRecordingStarted) return;
+            isRecording = false;
+            isRecordingStarted = false;
+            isRecordingStopped = true;
+            btnStart.disabled = false;
+            btnStop.disabled = true;
+            statusText.innerText = "Recording Complete";
+            statusBar.innerText = "Duration: 0.00s";
+            drawWaveform();
+        }
+
+        // --- Audio Processing ---
+        function processAudio() {
+            if (!audioCtx) return;
+
+            // Get current note
+            if (!currentNote) {
+                currentNote = audioCtx.createOscillator();
+                currentNote.type = 'square';
+                currentNote.frequency = audioCtx.currentTime + currentNoteTime;
+                currentNote.connect(audioCtx.destination);
+                return;
+            }
+
+            // Get current note parameters
+            const osc = currentNote;
+            const oscFreq = osc.frequency;
+            const oscVol = osc.volume;
+            const envelope = envelope;
+            const attack = attack;
+            const release = release;
+            const duration = duration;
+            const durationSec = durationSec;
+            const durationMs = durationMs;
+
+            // Envelope
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // --- Event Listeners ---
+        btnStart.addEventListener('click', startRecording);
+        btnStop.addEventListener('click', stopRecording);
+
+        // --- UI Updates ---
+        function updateUI() {
+            if (isRecording) {
+                statusText.innerText = "Recording...";
+                statusBar.innerText = "Duration: " + currentNoteDuration.toFixed(2) + "s";
+                noteIndicator.style.backgroundColor = '#007acc';
+            } else {
+                statusText.innerText = "Ready";
+                statusBar.innerText = "Duration: 0.00s";
+                noteIndicator.style.backgroundColor = 'transparent';
+            }
+        }
+
+        // --- Save Functions ---
+        function saveToJSON() {
+            const data = {
+                name: '5x3 Square',
+                type: 'square',
+                freq: 48000,
+                volume: squareSound.volume,
+                envelope: squareSound.envelope,
+                wave: squareSound.wave
+            };
+            const json = {
+                name: '5x3 Square',
+                type: 'square',
+                freq: 48000,
+                volume: squareSound.volume,
+                envelope: squareSound.envelope,
+                wave: squareSound.wave
+            };
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '5x3-square.json';
+            a.click();
+        }
+
+        function saveToWAV() {
+            const data = {
+                name: '5x3 Square',
+                type: 'square',
+                freq: 48000,
+                volume: squareSound.volume,
+                envelope: squareSound.envelope,
+                wave: squareSound.wave
+            };
+            const wavData = new Uint8Array(audioBuffer.getChannelData(0));
+            for (let i = 0; i < audioBuffer.length; i++) {
+                wavData[i] = Math.sin(i * 0.001) * 0.99;
+            }
+            const wavBlob = new Blob([wavData], { type: 'audio/wav' });
+            const url = URL.createObjectURL(wavBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '5x3-square.wav';
+            a.click();
+        }
+
+        // --- Initialization ---
+        init();
+        updateUI();
+    </script>
+
+
+    
+    <script>
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Core - Interactive Element</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS Variables for Neon Theme */
+        :root {
+            --neon-green: #00ff00;
+            --neon-green-dim: #00cc00;
+            --neon-black: #000000;
+            --neon-black-dim: #000000;
+            --bg-color: #050505;
+            --card-bg: rgba(0, 20, 0, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--neon-green);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* Card Layout */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--neon-green);
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2), inset 0 0 20px rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Neon Border Effect */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 0, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        /* Typography */
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--neon-green);
+        }
+
+        /* Button */
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--neon-green);
+            color: var(--neon-black);
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>NEON CORE</h1>
+            <p class="subtitle">Cyberpunk Interface</p>
+        </header>
+
+        <div class="card">
+            <h2>System Status</h2>
+            <p>
+                <i class="fa-solid fa-wifi"></i> Network Active
+            </p>
+            <p>
+                <i class="fa-solid fa-satellite-dish"></i> Signal: 100%
+            </p>
+            <p>
+                <i class="fa-solid fa-shield-halved"></i> Security: Secure
+            </p>
+            
+            <button class="btn">Initialize System</button>
+        </div>
+
+        <footer>
+            &copy; 2023 Neon Core Systems
+        </footer>
+    </div>
+
+    <script>
+        // Simple JS for interactivity
+        document.querySelector('button').addEventListener('click', function() {
+            this.style.backgroundColor = '#00ff00';
+            this.style.color = '#000';
+            this.style.borderColor = '#00ff00';
+            
+            setTimeout(() => {
+                this.style.backgroundColor = 'transparent';
+                this.style.color = '#00ff00';
+                this.style.borderColor = '#00ff00';
+            }, 300);
+        });
+    </script>
+</body>
+</html>
+    </script>
+    
+    <hr>
+    <p><em>Generated by Supreme Master Agent | Assembled on 15/4/2026, 17.15.37</em></p>
+</body>
+</html>

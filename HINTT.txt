@@ -1,0 +1,5 @@
+🏁 Summary
+Type exit → Window closes. Session ends. ✅
+Run supremestart.bat again → New window opens. New session starts. ✅
+Don't type exit → Old window stays open. New window opens separately. (You now have two agents). ⚠️
+So, yes: One exit = One session done. 🚀👑

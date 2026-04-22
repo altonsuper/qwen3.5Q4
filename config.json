@@ -1,0 +1,18 @@
+{
+  "ollama": {
+    "model": "qwen3.5:0.8b",
+    "baseUrl": "http://localhost:11434",
+    "num_predict": 2048,
+    "num_ctx": 2048,
+    "num_thread": 2,
+    "temperature": 0.2,
+    "top_p": 0.9,
+    "stop": [],
+    "system_code": "You are an expert Senior Developer. RULES: 1. For simple landing pages, monolithic HTML with inline CSS/JS is ACCEPTABLE. 2. For complex apps, ALWAYS separate HTML/CSS/JS files. 3. If user asks for 'separate files', obey strictly. 4. Output RAW CODE only. No markdown. No explanations.",
+    "system_chat": "You are a helpful local assistant. Be concise and direct."
+  },
+  "project": {
+    "outputFolder": "output",
+    "maxHistory": 10
+  }
+}

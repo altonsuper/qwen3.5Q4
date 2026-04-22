@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5x3 Square DAW</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --panel-bg: #252526;
+            --accent: #007acc;
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --border: #333;
+            --grid-line: #111;
+            --note-color: #007acc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            background: #333;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            margin-bottom: 5px;
+        }
+
+        button:hover {
+            background-color: #005f9e;
+        }
+
+        button.secondary {
+            background-color: #444;
+        }
+
+        button.secondary:hover {
+            background-color: #555;
+        }
+
+        /* Main Area Styles */
+        .main-area {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .waveform-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: #000;
+            border: 2px solid var(--border);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-bar {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        /* Note Indicator */
+        .note-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 15px;
+            height: 15px;
+            background-color: var(--note-color);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--note-color);
+            transition: background-color 0.1s;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>5x3 Square DAW</h2>
+        
+        <div class="control-group">
+            <label>Load Sound (JSON)</label>
+            <input type="file" id="soundInput" accept=".json">
+        </div>
+
+        <div class="control-group">
+            <label>Recording</label>
+            <button id="btnStart">Start Recording</button>
+            <button id="btnStop" class="secondary">Stop Recording</button>
+        </div>
+
+        <div class="control-group">
+            <label>Settings</label>
+            <button onclick="saveToJSON()">Save JSON</button>
+            <button onclick="saveToWAV()">Save WAV</button>
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="main-area">
+        <div class="note-indicator" id="noteIndicator"></div>
+        <div class="waveform-container">
+            <canvas id="waveCanvas"></canvas>
+        </div>
+        <div class="controls-overlay">
+            <span id="statusText">Ready</span>
+            <div class="status-bar" id="statusBar">Duration: 0.00s</div>
+        </div>
+    </div>
+
+    <script>
+        // --- Audio Engine ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let audioBuffer;
+        let currentNote = null;
+        let currentDuration = 0;
+        let isRecording = false;
+        let isRecordingStarted = false;
+        let isRecordingStopped = false;
+        let currentNoteIndex = 0;
+        let currentNoteTime = 0;
+        let currentNoteFreq = 0;
+        let currentNoteVol = 0;
+        let currentNoteEnvelope = 0;
+        let currentNoteAttack = 0;
+        let currentNoteRelease = 0;
+        let currentNoteDuration = 0;
+        let currentNoteDurationInSec = 0;
+        let currentNoteDurationInMs = 0;
+
+        // 5x3 Square Sound Definition (Simplified)
+        // Using 48kHz, 16-bit, Square Wave
+        const squareSound = {
+            name: "5x3 Square",
+            type: "square",
+            freq: 48000,
+            volume: 0.5,
+            envelope: {
+                attack: 0.01,
+                decay: 0.05,
+                sustain: 0.05,
+                release: 0.1
+            },
+            // A simple square wave approximation
+            wave: {
+                freq: 48000,
+                amplitude: 0.5,
+                attack: 0.01,
+                decay: 0.05,
+                sustain: 0.05,
+                release: 0.1
+            }
+        };
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnStart = document.getElementById('btnStart');
+        const btnStop = document.getElementById('btnStop');
+        const statusText = document.getElementById('statusText');
+        const statusBar = document.getElementById('statusBar');
+        const noteIndicator = document.getElementById('noteIndicator');
+
+        // --- Initialization ---
+        function init() {
+            // Load Sound
+            const fileInput = document.getElementById('soundInput');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if (json.type === 'audio') {
+                            audioCtx = new AudioContext();
+                            audioBuffer = audioCtx.decodeAudioData(json.data);
+                            // Set volume based on file size
+                            const vol = Math.min(1, Math.max(0.1, audioBuffer.duration / 1000));
+                            squareSound.volume = vol;
+                            console.log("Loaded Sound:", json.name);
+                        } else {
+                            alert("Invalid JSON format.");
+                        }
+                    } catch (err) {
+                        alert("Error loading sound file.");
+                    }
+                };
+                reader.readAsText(fileInput.files[0]);
+            } else {
+                alert("Please select a sound file.");
+            }
+        }
+
+        // --- Waveform Drawing ---
+        function drawWaveform() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const step = width / 100; // 100 squares per row
+            const gridSize = 10; // 10x10 grid
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * step);
+                ctx.lineTo(width, i * step);
+                ctx.stroke();
+            }
+
+            // Draw Squares
+            for (let i = 0; i < gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * step, 0);
+                ctx.lineTo(i * step, height);
+                ctx.stroke();
+            }
+
+            // Draw Note
+            if (currentNoteIndex >= gridSize) {
+                // Finished recording
+                drawNote(currentNoteIndex, 0, 0, 0, 0, 0);
+                currentNoteIndex = 0;
+                currentNoteTime = 0;
+                currentNoteFreq = 0;
+                currentNoteVol = 0;
+                currentNoteEnvelope = 0;
+                currentNoteAttack = 0;
+                currentNoteRelease = 0;
+                currentNoteDuration = 0;
+                currentNoteDurationInSec = 0;
+                currentNoteDurationInMs = 0;
+                currentNote = null;
+                statusText.innerText = "Recording Complete";
+                statusText.style.color = "#007acc";
+                statusBar.innerText = "Duration: 0.00s";
+                return;
+            }
+
+            const noteX = i * step;
+            const noteY = 0;
+
+            // Draw Note
+            drawNote(currentNoteIndex, noteX, noteY, currentNoteFreq, currentNoteVol, currentNoteEnvelope, currentNoteAttack, currentNoteRelease, currentNoteDuration, currentNoteDurationInSec, currentNoteDurationInMs);
+        }
+
+        function drawNote(index, x, y, freq, vol, envelope, attack, release, duration, durationSec, durationMs) {
+            const step = 10;
+            const gridSize = 10;
+
+            // Draw Grid
+            ctx.strokeStyle = '#007acc';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * step, 0);
+                ctx.lineTo(i * step, height);
+                ctx.stroke();
+            }
+
+            // Draw Note
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + step, y + step);
+            ctx.stroke();
+
+            // Draw Note Body
+            ctx.beginPath();
+            ctx.arc(x + step, y + step, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#007acc';
+            ctx.fill();
+
+            // Draw Note Head
+            ctx.beginPath();
+            ctx.arc(x + step, y + step, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            // Draw Note Label
+            ctx.fillStyle = '#007acc';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(freq, x + step + 5, y + step + 5);
+
+            // Draw Envelope
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step, y + step + 5);
+            ctx.stroke();
+
+            // Draw Attack
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step, y + step + 10);
+            ctx.stroke();
+
+            // Draw Release
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step + 10, y + step + 10);
+            ctx.stroke();
+
+            // Draw Duration
+            ctx.beginPath();
+            ctx.moveTo(x + step, y + step);
+            ctx.lineTo(x + step + 10, y + step + 10);
+            ctx.stroke();
+
+            // Draw Duration Label
+            ctx.fillStyle = '#007acc';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(durationSec.toFixed(2), x + step + 5, y + step + 5);
+
+            // Draw Duration in ms
+            ctx.fillStyle = '#007acc';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(durationMs.toFixed(2), x + step + 5, y + step + 5);
+        }
+
+        // --- Recording Logic ---
+        function startRecording() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            isRecording = true;
+            isRecordingStarted = true;
+            btnStart.disabled = true;
+            btnStop.disabled = false;
+            statusText.innerText = "Recording...";
+            statusBar.innerText = "Duration: 0.00s";
+            drawWaveform();
+        }
+
+        function stopRecording() {
+            if (!isRecordingStarted) return;
+            isRecording = false;
+            isRecordingStarted = false;
+            isRecordingStopped = true;
+            btnStart.disabled = false;
+            btnStop.disabled = true;
+            statusText.innerText = "Recording Complete";
+            statusBar.innerText = "Duration: 0.00s";
+            drawWaveform();
+        }
+
+        // --- Audio Processing ---
+        function processAudio() {
+            if (!audioCtx) return;
+
+            // Get current note
+            if (!currentNote) {
+                currentNote = audioCtx.createOscillator();
+                currentNote.type = 'square';
+                currentNote.frequency = audioCtx.currentTime + currentNoteTime;
+                currentNote.connect(audioCtx.destination);
+                return;
+            }
+
+            // Get current note parameters
+            const osc = currentNote;
+            const oscFreq = osc.frequency;
+            const oscVol = osc.volume;
+            const envelope = envelope;
+            const attack = attack;
+            const release = release;
+            const duration = duration;
+            const durationSec = durationSec;
+            const durationMs = durationMs;
+
+            // Envelope
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // --- Event Listeners ---
+        btnStart.addEventListener('click', startRecording);
+        btnStop.addEventListener('click', stopRecording);
+
+        // --- UI Updates ---
+        function updateUI() {
+            if (isRecording) {
+                statusText.innerText = "Recording...";
+                statusBar.innerText = "Duration: " + currentNoteDuration.toFixed(2) + "s";
+                noteIndicator.style.backgroundColor = '#007acc';
+            } else {
+                statusText.innerText = "Ready";
+                statusBar.innerText = "Duration: 0.00s";
+                noteIndicator.style.backgroundColor = 'transparent';
+            }
+        }
+
+        // --- Save Functions ---
+        function saveToJSON() {
+            const data = {
+                name: '5x3 Square',
+                type: 'square',
+                freq: 48000,
+                volume: squareSound.volume,
+                envelope: squareSound.envelope,
+                wave: squareSound.wave
+            };
+            const json = {
+                name: '5x3 Square',
+                type: 'square',
+                freq: 48000,
+                volume: squareSound.volume,
+                envelope: squareSound.envelope,
+                wave: squareSound.wave
+            };
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '5x3-square.json';
+            a.click();
+        }
+
+        function saveToWAV() {
+            const data = {
+                name: '5x3 Square',
+                type: 'square',
+                freq: 48000,
+                volume: squareSound.volume,
+                envelope: squareSound.envelope,
+                wave: squareSound.wave
+            };
+            const wavData = new Uint8Array(audioBuffer.getChannelData(0));
+            for (let i = 0; i < audioBuffer.length; i++) {
+                wavData[i] = Math.sin(i * 0.001) * 0.99;
+            }
+            const wavBlob = new Blob([wavData], { type: 'audio/wav' });
+            const url = URL.createObjectURL(wavBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '5x3-square.wav';
+            a.click();
+        }
+
+        // --- Initialization ---
+        init();
+        updateUI();
+    </script>
+</body>
+</html>

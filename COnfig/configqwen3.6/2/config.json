@@ -1,0 +1,10 @@
+"ollama": {
+  "model": "qwen3.5:0.8b",
+  "baseUrl": "http://localhost:11434",
+  "num_predict": 2048, 
+  "temperature": 0.2,
+  "top_p": 0.9,
+  "stop": [],
+  ""system_code": "You are an expert Senior Developer. STRICT RULES: 1. NEVER create monolithic files. 2. ALWAYS output separate code blocks for HTML, CSS, and JS. 3. HTML must link to external .css and .js files. 4. Output RAW CODE only. No markdown. No explanations."
+  "system_chat": "You are a helpful local assistant. Be concise and direct."
+}

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assembled project1</title>
+    <style>
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCaltonZ Feed</title>
+    <style>
+        /* CSS - Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #111;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #00ff41;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            background: #000;
+            color: #fff;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #00ff41;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00cc33;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.6);
+        }
+
+        .post-card {
+            background: #1a1a1a;
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ff41;
+            padding-bottom: 10px;
+        }
+
+        .post-title {
+            font-size: 18px;
+            color: #fff;
+            margin: 0;
+        }
+
+        .post-meta {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border: 1px solid #00ff41;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: #00ff41;
+            color: #000;
+        }
+
+        .post-footer {
+            padding: 15px;
+            background: #000;
+            border-top: 1px solid #00ff41;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .post-footer a {
+            color: #00ff41;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .post-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Auto Post Logic */
+        .auto-post {
+            text-align: center;
+            padding: 20px;
+            background: #000;
+            border: 1px dashed #00ff41;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MCaltonZ Feed</h1>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search posts...">
+        <button onclick="searchPosts()">Search</button>
+    </div>
+
+    <div id="feedContainer">
+        <!-- Posts will be injected here -->
+    </div>
+
+    <div class="auto-post">
+        <h3>🚀 Auto-Post Triggered</h3>
+        <p>System has detected a new post. Click the button below to post it manually.</p>
+        <button onclick="postNewPost(123)">Post</button>
+    </div>
+</div>
+
+<script>
+    // JS - Logic
+    function searchPosts() {
+        const input = document.getElementById('searchInput').value;
+        const feedContainer = document.getElementById('feedContainer');
+        
+        if (input.trim() === "") {
+            feedContainer.innerHTML = '<p>No posts found.</p>';
+            return;
+        }
+
+        const posts = posts.filter(p => p.title.toLowerCase().includes(input.toLowerCase()));
+        
+        if (posts.length > 0) {
+            feedContainer.innerHTML = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-header">
+                        <span class="post-title">${post.title}</span>
+                        <span class="post-meta">Posted ${post.date}</span>
+                    </div>
+                    <div class="post-image">${post.image}</div>
+                    <div class="post-actions">
+                        <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                        <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                    </div>
+                    <div class="post-footer">
+                        ${post.content}
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            feedContainer.innerHTML = '<p>No posts found matching your search.</p>';
+        }
+    }
+
+    function postNewPost(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const shareText = `Click to share ${post.title}`;
+        const shareHtml = `
+            <div class="post-card">
+                <div class="post-header">
+                    <span class="post-title">${post.title}</span>
+                    <span class="post-meta">Posted ${post.date}</span>
+                </div>
+                <div class="post-image">${post.image}</div>
+                <div class="post-actions">
+                    <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                    <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                </div>
+                <div class="post-footer">
+                    ${post.content}
+                </div>
+            </div>
+        `;
+        feedContainer.innerHTML += shareHtml;
+    }
+
+    function sharePost(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const shareText = `Click to share ${post.title}`;
+        const shareHtml = `
+            <div class="post-card">
+                <div class="post-header">
+                    <span class="post-title">${post.title}</span>
+                    <span class="post-meta">Posted ${post.date}</span>
+                </div>
+                <div class="post-image">${post.image}</div>
+                <div class="post-actions">
+                    <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                    <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                </div>
+                <div class="post-footer">
+                    ${post.content}
+                </div>
+            </div>
+        `;
+        feedContainer.innerHTML += shareHtml;
+    }
+
+    // Auto-Post Logic
+    function autoPost() {
+        // Check if it's 30 days from now
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        if (today > thirtyDaysAgo) {
+            // Trigger the post
+            const newPost = {
+                id: Date.now(),
+                title: `Auto-Post from MCaltonZ`,
+                content: `This is a post that will appear automatically.`,
+                image: `https://via.placeholder.com/400x200?text=Auto+Post`,
+                date: today.toLocaleDateString()
+            };
+            posts.push(newPost);
+            renderFeed();
+        }
+    }
+
+    // Run on load
+    renderFeed();
+    autoPost();
+</script>
+
+</body>
+</html>
+    </style>
+</head>
+<body>
+    <!DOCTYPE html>
+
+
+
+
+<div class="container">
+    <h1>MCaltonZ Feed</h1>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search posts...">
+        <button onclick="searchPosts()">Search</button>
+    </div>
+
+    <div id="feed"></div>
+</div>
+
+<script>
+    // JAVASCRIPT - Logic
+    const feedContainer = document.getElementById('feed');
+    const searchInput = document.getElementById('searchInput');
+    const posts = [];
+
+    // Initialize with some dummy data
+    for(let i=0; i<5; i++) {
+        posts.push({
+            id: i,
+            title: `Post ${i} from MCaltonZ`,
+            content: `This is a sample post from MCaltonZ. It's a test of the auto-posting logic.`,
+            image: `https://via.placeholder.com/400x200?text=Image+Placeholder`,
+            date: new Date().toLocaleDateString()
+        });
+    }
+
+    function renderFeed() {
+        feedContainer.innerHTML = '';
+        posts.forEach(post => {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post-card';
+            postDiv.innerHTML = `
+                <div class="post-header">
+                    <span class="post-title">${post.title}</span>
+                    <span class="post-meta">Posted ${post.date}</span>
+                </div>
+                <div class="post-image">${post.image}</div>
+                <div class="post-actions">
+                    <button class="action-btn btn-reply" onclick="replyPost(${post.id})">Reply</button>
+                    <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                    <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                </div>
+                <div class="post-footer">
+                    ${post.content}
+                </div>
+            `;
+            feedContainer.appendChild(postDiv);
+        });
+    }
+
+    function searchPosts() {
+        const term = searchInput.value.toLowerCase();
+        const filtered = posts.filter(post => 
+            post.title.toLowerCase().includes(term) || 
+            post.content.toLowerCase().includes(term)
+        );
+        renderFeed(filtered);
+    }
+
+    function postNewPost(postId) {
+        const newPost = {
+            id: Date.now(),
+            title: `New Post from MCaltonZ`,
+            content: `This is a new post created automatically.`,
+            image: `https://via.placeholder.com/400x200?text=New+Image`,
+            date: new Date().toLocaleDateString()
+        };
+        posts.push(newPost);
+        renderFeed();
+    }
+
+    function replyPost(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const reply = document.createElement('div');
+        reply.className = 'post-card';
+        reply.innerHTML = `
+            <div class="post-header">
+                <span class="post-title">Reply to ${post.title}</span>
+                <span class="post-meta">Posted ${post.date}</span>
+            </div>
+            <div class="post-image">${post.image}</div>
+            <div class="post-actions">
+                <button class="action-btn btn-reply" onclick="replyPost(${post.id})">Reply</button>
+                <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+            </div>
+            <div class="post-footer">
+                ${post.content}
+            </div>
+        `;
+        feedContainer.appendChild(reply);
+    }
+
+    function sharePost(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const shareText = `Click to share ${post.title}`;
+        const shareHtml = `
+            <div class="post-card">
+                <div class="post-header">
+                    <span class="post-title">${post.title}</span>
+                    <span class="post-meta">Posted ${post.date}</span>
+                </div>
+                <div class="post-image">${post.image}</div>
+                <div class="post-actions">
+                    <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                    <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                </div>
+                <div class="post-footer">
+                    ${post.content}
+                </div>
+            </div>
+        `;
+        feedContainer.innerHTML += shareHtml;
+    }
+
+    // Auto-Post Logic
+    function autoPost() {
+        // Check if it's 30 days from now
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        if (today > thirtyDaysAgo) {
+            // Trigger the post
+            const newPost = {
+                id: Date.now(),
+                title: `Auto-Post from MCaltonZ`,
+                content: `This is a post that will appear automatically.`,
+                image: `https://via.placeholder.com/400x200?text=Auto+Post`,
+                date: today.toLocaleDateString()
+            };
+            posts.push(newPost);
+            renderFeed();
+        }
+    }
+
+    // Run on load
+    renderFeed();
+    autoPost();
+
+</script>
+
+
+
+    
+    <script>
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Interactive Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #00ff41;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .score-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .game-area {
+            margin: 20px 0;
+            min-height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.3), rgba(0, 255, 65, 0.1));
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .game-btn {
+            background: linear-gradient(135deg, #00ff41, #00cc33);
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            color: #000;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .game-btn:active {
+            transform: translateY(1px);
+        }
+
+        .game-btn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .game-message {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Click to Play!</h1>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <span class="score-label">Score</span>
+                <span class="score-value" id="score">0</span>
+            </div>
+            <div class="score-item">
+                <span class="score-label">Level</span>
+                <span class="score-value" id="level">1</span>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <button class="game-btn" id="gameBtn">Click Me!</button>
+        </div>
+
+        <div class="game-message">
+            <p>Click the button to start!</p>
+        </div>
+    </div>
+
+    <script>
+        // JS - Game Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const scoreElement = document.getElementById('score');
+            const levelElement = document.getElementById('level');
+            const gameBtn = document.getElementById('gameBtn');
+            const gameArea = document.querySelector('.game-area');
+            const gameMessage = document.querySelector('.game-message');
+
+            let score = 0;
+            let level = 1;
+            let isPlaying = false;
+            let gameInterval;
+
+            // Game logic
+            function startGame() {
+                score = 0;
+                level = 1;
+                isPlaying = true;
+                gameInterval = setInterval(gameLoop, 1000);
+                gameBtn.disabled = false;
+                gameArea.style.opacity = '0.5';
+                gameMessage.textContent = `Level ${level} - Click to play!`;
+            }
+
+            function gameLoop() {
+                if (!isPlaying) return;
+
+                // Increase score
+                score++;
+                scoreElement.textContent = score;
+
+                // Level up every 100 points
+                if (score % 100 === 0) {
+                    level++;
+                    levelElement.textContent = level;
+                    gameMessage.textContent = `Level ${level} - Click to play!`;
+                }
+
+                // Game over condition
+                if (score >= 100) {
+                    clearInterval(gameInterval);
+                    isPlaying = false;
+                    gameBtn.textContent = "Game Over!";
+                    gameBtn.style.backgroundColor = "#ff4444";
+                    gameBtn.style.color = "#fff";
+                    gameMessage.textContent = "You reached the goal!";
+                }
+            }
+
+            // Click handler
+            gameBtn.addEventListener('click', () => {
+                if (!isPlaying) return;
+
+                // Increase score
+                score++;
+                scoreElement.textContent = score;
+
+                // Level up every 100 points
+                if (score % 100 === 0) {
+                    level++;
+                    levelElement.textContent = level;
+                    gameMessage.textContent = `Level ${level} - Click to play!`;
+                }
+
+                // Game over condition
+                if (score >= 100) {
+                    clearInterval(gameInterval);
+                    isPlaying = false;
+                    gameBtn.textContent = "Game Over!";
+                    gameBtn.style.backgroundColor = "#ff4444";
+                    gameBtn.style.color = "#fff";
+                    gameMessage.textContent = "You reached the goal!";
+                }
+            });
+
+            // Start the game when DOM is loaded
+            startGame();
+        });
+    </script>
+</body>
+</html>
+    </script>
+    
+    <hr>
+    <p><em>Generated by Supreme Master Agent | Assembled on 15/4/2026, 11.58.48</em></p>
+</body>
+</html>

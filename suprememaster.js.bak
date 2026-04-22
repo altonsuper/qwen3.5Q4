@@ -1,0 +1,136 @@
+// suprememaster.js V9.0 - RAW CODE SPECIALIST
+const readline = require('readline');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+// Load Config
+const CONFIG = require('./config.json');
+const MODEL = CONFIG.ollama.model;
+const ROOT_DIR = __dirname;
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+console.log("👑 SUPREME MASTER AGENT V9.0 [RAW CODE MODE]");
+console.log(`🧠 Model: ${MODEL} | Temp: ${CONFIG.ollama.temperature}`);
+console.log("💡 Type 'exit' to quit.\n");
+
+// 1. Select Project
+async function selectProject() {
+    const projects = fs.readdirSync(ROOT_DIR).filter(file => fs.statSync(path.join(ROOT_DIR, file)).isDirectory());
+    if (projects.length === 0) { console.log("⚠️ No projects found."); return null; }
+    console.log("📁 Available Projects:");
+    projects.forEach((p, i) => console.log(`   ${i + 1}. ${p}`));
+    const choice = await new Promise(resolve => rl.question('\n👑 Select Project Number: ', resolve));
+    const index = parseInt(choice) - 1;
+    if (index >= 0 && index < projects.length) return projects[index];
+    return selectProject();
+}
+
+// 2. Send to Ollama
+function sendToOllamaStream(messages, projectName) {
+    return new Promise((resolve, reject) => {
+        // System Prompt Khusus Raw Code
+        const systemPrompt = `${CONFIG.ollama.system_code}
+        Context: Project "${projectName}".
+        Instruction: Output ONLY the raw code content. Do NOT use markdown blocks. Do NOT explain.`;
+
+        let finalMessages = [{ role: 'system', content: systemPrompt }];
+        messages.forEach(m => { if (m.role !== 'system') finalMessages.push(m); });
+
+        const postData = JSON.stringify({
+            model: MODEL,
+            messages: finalMessages,
+            stream: true,
+            options: {
+                num_predict: CONFIG.ollama.num_predict,
+                temperature: CONFIG.ollama.temperature,
+                stop: CONFIG.ollama.stop
+            }
+        });
+
+        const req = http.request({
+            hostname: 'localhost', port: 11434, path: '/api/chat', method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        }, (res) => {
+            let fullResponse = '';
+            res.on('data', (chunk) => {
+                const lines = chunk.toString().split('\n').filter(l => l.trim() !== '');
+                for (const line of lines) {
+                    try {
+                        const json = JSON.parse(line);
+                        if (json.message && json.message.content) {
+                            fullResponse += json.message.content;
+                            process.stdout.write(json.message.content);
+                        }
+                        if (json.done) resolve(fullResponse);
+                    } catch (e) {}
+                }
+            });
+            res.on('end', () => resolve(fullResponse));
+        });
+        req.on('error', reject);
+        req.write(postData);
+        req.end();
+    });
+}
+
+// 3. Smart Raw Code Saver
+function saveRawCode(text, projectPath) {
+    // Bersihkan Markdown jika ada (```html ... ```)
+    let cleanCode = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+    
+    if (cleanCode.length < 50) return null; // Abaikan respons terlalu pendek
+
+    let filename = null;
+
+    // Deteksi Tipe File Otomatis
+    if (cleanCode.startsWith('<!DOCTYPE') || cleanCode.startsWith('<html')) {
+        filename = 'index.html';
+    } 
+    else if (cleanCode.includes('body {') || cleanCode.includes('canvas {') || cleanCode.includes('.class')) {
+        filename = 'style.css';
+    } 
+    else if (cleanCode.includes('function ') || cleanCode.includes('const canvas') || cleanCode.includes('document.')) {
+        filename = 'game.js';
+    }
+
+    if (filename) {
+        const fullPath = path.join(projectPath, filename);
+        fs.writeFileSync(fullPath, cleanCode);
+        return `✅ Saved as: ${filename}`;
+    }
+    
+    return null;
+}
+
+// 4. Main Loop
+async function startChat(projectName) {
+    const projectPath = path.join(ROOT_DIR, projectName);
+    console.log(`\n🚀 Working in: ${projectName}`);
+    console.log("📂 Files will be saved directly to this folder.\n");
+    let history = [];
+
+    while (true) {
+        const userInput = await new Promise(resolve => rl.question(`👤 You [${projectName}]: `, resolve));
+        if (userInput.toLowerCase().trim() === 'exit') { rl.close(); process.exit(0); }
+        
+        history.push({ role: 'user', content: userInput });
+        process.stdout.write('🤖 Qwen: ');
+        
+        try {
+            const rawReply = await sendToOllamaStream(history, projectName);
+            
+            // Coba simpan otomatis
+            const saveMsg = saveRawCode(rawReply, projectPath);
+            if (saveMsg) {
+                console.log(`\n${saveMsg}`);
+            }
+
+            history.push({ role: 'assistant', content: rawReply });
+        } catch (err) {
+            console.error('\n❌ Error:', err.message);
+        }
+    }
+}
+
+selectProject().then(project => { if (project) startChat(project); });

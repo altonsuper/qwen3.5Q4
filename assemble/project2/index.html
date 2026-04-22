@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCaltonZ Feed</title>
+    <style>
+        /* CSS - Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #3498db;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .post-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .post-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .post-meta {
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-post {
+            background-color: #27ae60;
+        }
+        .btn-post:hover { background-color: #219150; }
+
+        .btn-reply {
+            background-color: #3498db;
+        }
+        .btn-reply:hover { background-color: #2980b9; }
+
+        .btn-share {
+            background-color: #e67e22;
+        }
+        .btn-share:hover { background-color: #d35400; }
+
+        .post-footer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .search-box {
+                flex-direction: column;
+            }
+            input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MCaltonZ Feed</h1>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search posts...">
+        <button onclick="searchPosts()">Search</button>
+    </div>
+
+    <div id="feed"></div>
+</div>
+
+<script>
+    // JAVASCRIPT - Logic
+    const feedContainer = document.getElementById('feed');
+    const searchInput = document.getElementById('searchInput');
+    const posts = [];
+
+    // Initialize with some dummy data
+    for(let i=0; i<5; i++) {
+        posts.push({
+            id: i,
+            title: `Post ${i} from MCaltonZ`,
+            content: `This is a sample post from MCaltonZ. It's a test of the auto-posting logic.`,
+            image: `https://via.placeholder.com/400x200?text=Image+Placeholder`,
+            date: new Date().toLocaleDateString()
+        });
+    }
+
+    function renderFeed() {
+        feedContainer.innerHTML = '';
+        posts.forEach(post => {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post-card';
+            postDiv.innerHTML = `
+                <div class="post-header">
+                    <span class="post-title">${post.title}</span>
+                    <span class="post-meta">Posted ${post.date}</span>
+                </div>
+                <div class="post-image">${post.image}</div>
+                <div class="post-actions">
+                    <button class="action-btn btn-reply" onclick="replyPost(${post.id})">Reply</button>
+                    <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                    <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                </div>
+                <div class="post-footer">
+                    ${post.content}
+                </div>
+            `;
+            feedContainer.appendChild(postDiv);
+        });
+    }
+
+    function searchPosts() {
+        const term = searchInput.value.toLowerCase();
+        const filtered = posts.filter(post => 
+            post.title.toLowerCase().includes(term) || 
+            post.content.toLowerCase().includes(term)
+        );
+        renderFeed(filtered);
+    }
+
+    function postNewPost(postId) {
+        const newPost = {
+            id: Date.now(),
+            title: `New Post from MCaltonZ`,
+            content: `This is a new post created automatically.`,
+            image: `https://via.placeholder.com/400x200?text=New+Image`,
+            date: new Date().toLocaleDateString()
+        };
+        posts.push(newPost);
+        renderFeed();
+    }
+
+    function replyPost(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const reply = document.createElement('div');
+        reply.className = 'post-card';
+        reply.innerHTML = `
+            <div class="post-header">
+                <span class="post-title">Reply to ${post.title}</span>
+                <span class="post-meta">Posted ${post.date}</span>
+            </div>
+            <div class="post-image">${post.image}</div>
+            <div class="post-actions">
+                <button class="action-btn btn-reply" onclick="replyPost(${post.id})">Reply</button>
+                <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+            </div>
+            <div class="post-footer">
+                ${post.content}
+            </div>
+        `;
+        feedContainer.appendChild(reply);
+    }
+
+    function sharePost(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        
+        const shareText = `Click to share ${post.title}`;
+        const shareHtml = `
+            <div class="post-card">
+                <div class="post-header">
+                    <span class="post-title">${post.title}</span>
+                    <span class="post-meta">Posted ${post.date}</span>
+                </div>
+                <div class="post-image">${post.image}</div>
+                <div class="post-actions">
+                    <button class="action-btn btn-post" onclick="postNewPost(${post.id})">Post</button>
+                    <button class="action-btn btn-share" onclick="sharePost(${post.id})">Share</button>
+                </div>
+                <div class="post-footer">
+                    ${post.content}
+                </div>
+            </div>
+        `;
+        feedContainer.innerHTML += shareHtml;
+    }
+
+    // Auto-Post Logic
+    function autoPost() {
+        // Check if it's 30 days from now
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        if (today > thirtyDaysAgo) {
+            // Trigger the post
+            const newPost = {
+                id: Date.now(),
+                title: `Auto-Post from MCaltonZ`,
+                content: `This is a post that will appear automatically.`,
+                image: `https://via.placeholder.com/400x200?text=Auto+Post`,
+                date: today.toLocaleDateString()
+            };
+            posts.push(newPost);
+            renderFeed();
+        }
+    }
+
+    // Run on load
+    renderFeed();
+    autoPost();
+
+</script>
+
+</body>
+</html>

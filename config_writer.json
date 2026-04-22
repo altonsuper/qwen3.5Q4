@@ -1,0 +1,10 @@
+{
+  "ollama": {
+    "model": "qwen3.5:0.8b",
+    "num_predict": 1024,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "stop": ["\n\n\n"],
+    "system_code": "You are a professional corporate copywriter & SEO specialist. Tone: trusted, modern, persuasive. Output clean markdown or plain text. Structure content with headings, bullet points, and clear CTAs. No code unless requested."
+  }
+}

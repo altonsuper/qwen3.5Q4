@@ -1,0 +1,2 @@
+$env:OLLAMA_NUM_PARALLEL = 1
+node suprememaster.js project1
